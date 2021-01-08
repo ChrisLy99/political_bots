@@ -14,9 +14,6 @@ def main(targets):
     env_setup.make_datadir()
     
     if 'data' in targets:
-#         config = load_config("config/data_params.yaml")
-#         fp = get_data_range(**config)
-#         data = Tweet_Dataset(fp)
         get_troll_data()
 
 if __name__ == '__main__':
