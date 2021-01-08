@@ -64,6 +64,9 @@ data
 Scratchpad.ipynb
 .ipynb_checkpoints
 
+# twarc
+twarc.log
+
 # IPython
 profile_default/
 ipython_config.py
