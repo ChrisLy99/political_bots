@@ -1,9 +1,25 @@
+'''
+This file sets up necessary data directories and loads in API keys
+'''
 import os
+import json
 from utils import get_project_root
 
 
 root = get_project_root()
-cred_fp = os.path.join(root, '.env', 'twarc.yaml')
+cred_fp = os.path.join(root, '.env', 'twitter_credentials.json')
+
+def auth():
+    """Set-up keys for authentication to twitter API"""
+
+    creds = json.load(open(cred_fp))
+
+    os.environ['CONSUMER_KEY'] = creds.get('CONSUMER_KEY')
+    os.environ['CONSUMER_SECRET'] = creds.get('CONSUMER_SECRET')
+    os.environ['ACCESS_TOKEN'] = creds.get('ACCESS_TOKEN')
+    os.environ['ACCESS_TOKEN_SECRET'] = creds.get('ACCESS_TOKEN_SECRET')
+
+    return
 
 
 def make_datadir():
