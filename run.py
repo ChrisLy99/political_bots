@@ -17,7 +17,7 @@ def main(targets):
     
     if 'data' in targets:
         etl_election.generate_dataset()
-        etl_election.rehydrate_tweets(10)
+        etl_election.rehydrate_tweets(100)
 
 if __name__ == '__main__':
     targets = sys.argv[1:]
