@@ -11,8 +11,11 @@ cred_fp = os.path.join(root, '.env', 'twitter_credentials.json')
 
 def auth():
     """Set-up keys for authentication to twitter API"""
-
-    creds = json.load(open(cred_fp))
+    try:
+        creds = json.load(open(cred_fp))
+    except Exception as e:
+        print('API key file has not been properly set up!')
+        return
 
     os.environ['CONSUMER_KEY'] = creds.get('CONSUMER_KEY')
     os.environ['CONSUMER_SECRET'] = creds.get('CONSUMER_SECRET')

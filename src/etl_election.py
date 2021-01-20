@@ -13,9 +13,11 @@ from utils import get_project_root
 
 
 root = get_project_root()
+raw_data_path = os.path.join(root, 'data', 'raw')
+json_data_path = os.path.join(root, 'data', 'processed')
 
-### Shutong
 def configure_twarc():
+    """Passes api credentials into Twarc"""
     t = Twarc(
         os.getenv('CONSUMER_KEY'),
         os.getenv('CONSUMER_SECRET'),
@@ -24,7 +26,15 @@ def configure_twarc():
     )
     return t
 
-def generate_dataset(raw_data_path, from_time, to_time, trange='all'):
+def generate_dataset(trange='all'):
+    """Downloads tweet ID's in the specified date range"""
+    
+    date_range_fp = os.path.join(root, 'config', 'election_range.json')
+    date_range_dict = json.load(open(date_range_fp))
+    
+    from_time = date_range_dict['from_time']
+    to_time = date_range_dict['to_time']
+    
     # Get days of data between range
     days_between = pd.date_range(from_time, to_time, freq='d')
     
@@ -78,7 +88,7 @@ def sample_file(day_folder, sample_rate):
         result = result.append(s, ignore_index=True)
     return result
 
-def rehydrate_tweets(raw_data_path, json_data_path, sample_rate, api_keys_json):
+def rehydrate_tweets(sample_rate):
     # Start and configure Twarc
     t = configure_twarc()
     
