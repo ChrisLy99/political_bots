@@ -13,8 +13,8 @@ from utils import get_project_root
 
 
 root = get_project_root()
-raw_data_path = os.path.join(root, 'data', 'raw')
-json_data_path = os.path.join(root, 'data', 'processed')
+raw_data_path = os.path.join(root, 'data', 'raw', 'election')
+json_data_path = os.path.join(root, 'data', 'processed', 'election')
 
 def configure_twarc():
     """Passes api credentials into Twarc"""

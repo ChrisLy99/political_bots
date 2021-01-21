@@ -31,6 +31,7 @@ def make_datadir():
     data_loc = os.path.join(root, 'data')
 
     for d in ['raw', 'processed']:
-        os.makedirs(os.path.join(data_loc, d), exist_ok=True)
+        for d_2 in ['election', 'news']:
+            os.makedirs(os.path.join(data_loc, d, d_2), exist_ok=True)
 
     return
