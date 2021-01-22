@@ -15,7 +15,7 @@ def main(targets):
 
     env_setup.auth()
     env_setup.make_datadir()
-    
+
     if 'data' in targets:
         etl_news.test()
         # etl_election.generate_dataset()
