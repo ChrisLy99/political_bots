@@ -2,6 +2,7 @@ import os
 import subprocess
 import numpy as np
 import pandas as pd
+import json
 
 from datetime import timedelta, date
 from utils import get_project_root
@@ -10,56 +11,48 @@ from utils import get_project_root
 root = get_project_root()
 
 
-def get_troll_data():
-    """Downloads tweets for the days between start and end dates as a
-    single file.
+def get_news_rts():
+    """Downloads retweets for the networks specified in config file.
     
-    Dates range from start_date inclusive to end_date exclusive. Attempts
-    downloading data if data file doesn't already exist.
-       
-    Args:
-        start_date (str): start of data range. Format YYYY-MM-DD.
-        end_date (str): end of data range. Format YYYY-MM-DD.
-        clean (bool): specifies whether to download the cleaned data
-          (without retweets) or the raw data.
-        p (int): rate of tweets to hydrate.
-        
-    Returns:
-        Path to data file.
+    Attempts downloading data if data file doesn't already exist.
         
     """
-    # e.g. -> projectdir/data/raw/IRAhandle_tweets_5.csv
-    base_fn = 'IRAhandle_tweets_'
-    base = os.path.join(root, 'data/raw', base_fn)
-    
-    tot = []
-    save = False
-    for i in range(1, 14):
-        csv_path = f'{base}{i}.csv'
-    
-        if not os.path.isfile(csv_path):  # full data doesn't exist
-            save = True
-            # e.g. -> IRAhandle_tweets_5.csv
-            ext = f'{base_fn}{i}.csv'
-
-            url_base = f'https://raw.githubusercontent.com/fivethirtyeight/russian-troll-tweets/master'
-            url = os.path.join(url_base, ext)
-
-            curl_cmd = f'curl {url} --output {csv_path}'
-            subprocess.run(curl_cmd, shell=True)
+    news_path = os.path.join(root, 'config', 'news_stations.txt')
+    with open(news_path) as f:
+        for line in f:
+            screen_name = str.strip(line)
+            timeline_to_retweets(screen_name)
             
-            tmp = pd.read_csv(csv_path, usecols=['tweet_id']).values
-            tot = tot + list(tmp)
+def timeline_to_retweets(screen_name):
+    """Downloads retweets given the user screen name."""
+    jsonl_path = get_user_timeline(screen_name)
+    txt_path = os.path.splitext(jsonl_path)[0] + '.txt'
+    jsonl_path_rts = os.path.join(root, 'data/processed', f'{screen_name}_rts.jsonl')
     
-    if save:
-        tot = np.array(tot)
-        txt_path = os.path.join(root, 'data/raw', 'troll_ids.txt')
-        jsonl_path = os.path.join(root, 'data/processed', 'troll_rts.jsonl')
-        np.savetxt(txt_path, tot, fmt='%i')
-#         download_retweets(txt_path, jsonl_path)
+    if not os.path.isfile(txt_path):
+        twts = []
+        for line in open(jsonl_path):
+            twt = json.loads(line)
+            twts.append(twt['id_str'])
+        pre_rts = np.array(twts, dtype=np.int64)
+
+        np.savetxt(txt_path, pre_rts, fmt='%i')
+    
+    download_retweets(txt_path, jsonl_path_rts)
+        
+def get_user_timeline(screen_name):
+    """Retrieves user timeline data given retweet using twarc."""
+    jsonl_path = os.path.join(root, 'data/raw', f'{screen_name}.jsonl')
+    if not os.path.isfile(jsonl_path):
+        # e.g. twarc timeline realDonaldTrump > realDonaldTrump.jsonl
+        cmd = f'twarc timeline {screen_name} > {jsonl_path}'
+        subprocess.run(cmd, shell=True)
+    
+    return jsonl_path
     
 def download_retweets(txt_path, jsonl_path):
     """Retrieves retweets given ID using twarc."""
     if not os.path.isfile(jsonl_path):
         rt_cmd = f'twarc retweets {txt_path} > {jsonl_path}'
         subprocess.run(rt_cmd, shell=True)
+        

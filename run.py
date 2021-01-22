@@ -5,7 +5,7 @@ sys.path.insert(0, 'src')
 
 import env_setup
 from utils import get_project_root, load_config
-from etl import get_troll_data
+from etl import get_news_rts
 
 
 def main(targets):
@@ -14,7 +14,7 @@ def main(targets):
     env_setup.make_datadir()
     
     if 'data' in targets:
-        get_troll_data()
+        get_news_rts()
 
 if __name__ == '__main__':
     targets = sys.argv[1:]
