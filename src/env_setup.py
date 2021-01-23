@@ -24,7 +24,6 @@ def auth():
 
     return
 
-
 def make_datadir():
     """Set-up data directories."""
 
