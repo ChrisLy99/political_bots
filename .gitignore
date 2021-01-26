@@ -66,6 +66,7 @@ Scratchpad.ipynb
 
 # twarc
 twarc.log
+*.log
 
 # IPython
 profile_default/
