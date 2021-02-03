@@ -34,7 +34,7 @@ def test():
     # for tweet in t.retweets(['1352357900551860226']):
     #     print(tweet)
     # get_user_timeline('nytimes')
-    timeline_to_retweets('nytimes')
+    timeline_to_retweets('CNN')
 
 def get_news_rts():
     """Downloads retweets for the networks specified in config file.
@@ -46,6 +46,7 @@ def get_news_rts():
     with open(news_path) as f:
         for line in f:
             screen_name = str.strip(line)
+            print(f'inquiry on {screen_name}')
             timeline_to_retweets(screen_name)
             
 def timeline_to_retweets(screen_name):
@@ -82,10 +83,8 @@ def download_retweets(txt_path, jsonl_path):
     """Retrieves retweets given ID using twarc."""
     t = configure_twarc()
     if not os.path.isfile(jsonl_path):
-
-        with open(jsonl_path, 'w') as outfile:
-            with open(txt_path, 'r') as infile:
-                for tweet in infile.read().split('\n'):
-                    print(tweet)
-                    for retweet in t.retweets(list(tweet)):
-                        outfile.write(json.dumps(retweet) + '\n')
+        with open(jsonl_path, 'w+') as outfile:
+            with open(txt_path) as fh:
+                vec = fh.read().split('\n')
+                for retweet in t.retweets(vec):
+                    outfile.write(json.dumps(retweet) + '\n')

@@ -15,6 +15,7 @@ def auth():
         creds = json.load(open(cred_fp))
     except Exception as e:
         print('API key file has not been properly set up!')
+        print(e)
         return
 
     os.environ['CONSUMER_KEY'] = creds.get('CONSUMER_KEY')
