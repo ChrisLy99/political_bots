@@ -29,7 +29,7 @@ def make_datadir():
 
     data_loc = os.path.join(root, 'data')
 
-    for d in ['raw', 'processed']:
+    for d in ['raw', 'processed', 'graphs']:
         for d_2 in ['election', 'news']:
             os.makedirs(os.path.join(data_loc, d, d_2), exist_ok=True)
 
