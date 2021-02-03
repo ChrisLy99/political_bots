@@ -23,7 +23,7 @@ def configure_twarc():
 def test():
     t = configure_twarc()
 
-    get_users(screen_name='FoxNews')
+    get_users(screen_name='BBCWorld')
 
 def get_news_rts():
     """Downloads retweets for the networks specified in config file.
@@ -32,11 +32,12 @@ def get_news_rts():
 
     """
     news_path = os.path.join(root, 'config', 'news_stations.txt')
-    with open(news_path) as fh:
+    with open(news_path, 'r') as fh:
         for line in fh:
             screen_name = str.strip(line)
-            timeline_to_retweets(screen_name=screen_name)
-            
+            # timeline_to_retweets(screen_name=screen_name)
+            get_users(screen_name=screen_name)
+
 def get_timeline_retweeters():
     """Downloads timelines of users retweeting the networks specified
     in config file.
@@ -45,7 +46,7 @@ def get_timeline_retweeters():
 
     """
     news_path = os.path.join(root, 'config', 'news_stations.txt')
-    with open(news_path) as fh:
+    with open(news_path, 'r') as fh:
         for line in fh:
             screen_name = str.strip(line)
             get_users(screen_name)
@@ -58,7 +59,7 @@ def timeline_to_retweets(screen_name):
 
     if not os.path.isfile(txt_path):
         twts = []
-        with open(jsonl_path) as fh:
+        with open(jsonl_path, 'r') as fh:
             for line in fh:
                 twt = json.loads(line)
                 twts.append(twt['id_str'])
@@ -66,52 +67,70 @@ def timeline_to_retweets(screen_name):
         np.savetxt(txt_path, pre_rts, fmt='%i')
 
     download_retweets(txt_path, jsonl_path_rts)
-    
-def get_users(screen_name):
+
+def get_users(screen_name, n=500):
     """Retrieve user ids given retweets of a user."""
     path_rts = os.path.join(proc_data_path, f'{screen_name}_rts.jsonl')
     user_data_path = os.path.join(raw_data_path, f'{screen_name}_users')
     path_users = os.path.join(user_data_path, f'{screen_name}_users.txt')
+    path_sample = os.path.join(user_data_path, f'{screen_name}_{n}_users.txt')
     os.makedirs(user_data_path, exist_ok=True)
-    
-    if not os.path.isfile(path_users):
+
+    if not os.path.isfile(path_sample):
         users = set()
-        with open(path_rts) as fh:
-            for line in fh:
-                rt = json.loads(line)
-                users.add(rt['user']['id_str'])
-        ids = np.sort(np.array(list(users), dtype=np.int64))
-        np.savetxt(path_users, ids, fmt='%i')
-        
-    compile_users(screen_name)
-    
-def compile_users(screen_name):
+        if not os.path.isfile(path_users):
+            with open(path_rts, 'r') as fh:
+                for line in fh:
+                    rt = json.loads(line)
+                    users.add(rt['user']['id_str'])
+            ids = np.sort(np.array(list(users), dtype=np.int64))
+            np.savetxt(path_users, ids, fmt='%i')
+        ids = np.genfromtxt(path_users, dtype=np.int64)
+        sample = np.random.choice(ids, n, replace=False)
+        np.savetxt(path_sample, sample, fmt='%i')
+
+    compile_users(screen_name, n)
+
+def compile_users(screen_name, n):
     user_data_path = os.path.join(raw_data_path, f'{screen_name}_users')
-    path_users = os.path.join(user_data_path, f'{screen_name}_users.txt')
-    
-    with open(path_users) as fh:
+    path_sample = os.path.join(user_data_path, f'{screen_name}_{n}_users.txt')
+
+    with open(path_sample) as fh:
         for line in fh:
             user_id = str.strip(line)
-            txt_path = os.path.join(user_data_path, f'{user_id}.txt')
-            if not os.path.isfile(txt_path):
+            jsonl_path = os.path.join(user_data_path, f'{user_id}_tweets.jsonl')
+            if not os.path.isfile(jsonl_path):
                 get_user_timeline(user_id=user_id, fp=user_data_path)
-            
+
+    path_compiled = os.path.join(proc_data_path, f'{screen_name}_{n}_users.jsonl')
+    if not os.path.isfile(path_compiled):
+        # result = []
+        with open(path_sample, 'r') as fh, open(path_compiled, 'w') as outfile:
+            for line in fh:
+                user_id = str.strip(line)
+                jsonl_path = os.path.join(user_data_path, f'{user_id}_tweets.jsonl')
+                with open(jsonl_path) as infile:
+                    for line in infile:
+                        outfile.write(json.dumps(line) + '\n')
+                    # result.append(json.load(infile))
+            # with open(path_compiled, 'w') as outfile:
+            #     json.dump(result, outfile)
 
 def get_user_timeline(user_id=None, screen_name=None, fp=raw_data_path):
     """Retrieves user timeline data given retweet using twarc.
-    
+
     Requires either user_id or screen_name, not both.
-    
+
     Parameters:
         user_id: A user's unique id
         screen_name: A user's Twitter handle
         fp: file path for the timeline file
-        
+
     """
     t = configure_twarc()
     fn = screen_name if screen_name else user_id
     jsonl_path = os.path.join(fp, f'{fn}_tweets.jsonl')
-    
+
     if not os.path.isfile(jsonl_path):
         with open(jsonl_path, 'w') as outfile:
             for tweet in t.timeline(user_id=user_id, screen_name=screen_name):
@@ -122,7 +141,7 @@ def get_user_timeline(user_id=None, screen_name=None, fp=raw_data_path):
 def download_retweets(txt_path, jsonl_path):
     """Retrieves retweets given ID using twarc."""
     t = configure_twarc()
-    
+
     if not os.path.isfile(jsonl_path):
         with open(jsonl_path, 'w') as outfile, open(txt_path, 'r') as infile:
             for tweet in infile.read().split('\n'):
