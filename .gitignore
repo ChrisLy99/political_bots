@@ -61,6 +61,7 @@ target/
 data
 
 # Jupyter Notebook
+playground.ipynb
 Scratchpad.ipynb
 .ipynb_checkpoints
 
