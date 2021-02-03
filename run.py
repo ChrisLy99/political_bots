@@ -18,7 +18,7 @@ def main(targets):
     env_setup.make_datadir()
 
     if 'data' in targets:
-        etl_news.test()
+        etl_news.get_news_rts()
         # etl_election.generate_dataset()
         # etl_election.rehydrate_tweets(100)
     if 'eda' in targets:
