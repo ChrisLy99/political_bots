@@ -11,7 +11,7 @@ from utils import get_project_root
 
 root = get_project_root()
 raw_data_path = os.path.join(root, 'data', 'raw', 'news')
-json_data_path = os.path.join(root, 'data', 'processed', 'election')
+processed_data_path = os.path.join(root, 'data', 'processed', 'news')
 graph_data_path = os.path.join(root, 'data', 'graphs', 'news')
 
 def json_to_df(fp):
@@ -44,9 +44,9 @@ def get_hashtags(df):
     return my_dict
 
 def count_hashtags(folder):
-    """Returns dictionary of hashtag occurnces from all files in folder"""
+    """Returns dictionary of hashtag occurences from all files in folder"""
     total_counter = Counter()
-    
+    print()
 
     for filename in os.listdir(folder):
         print('Parsing current file: ', filename)
@@ -58,13 +58,10 @@ def count_hashtags(folder):
 
         total_counter += hashtags_dict
 
-#     basedir = os.path.dirname(__file__)
-#     fp = os.path.join(basedir, '..', 'data', 'out')
-
-#     with open(fp + '/top_50_hashtags.txt', "w", encoding='utf-8') as f:
-#         for k,v in  total_counter.most_common(50):
-#             # print(k,v)
-#             f.write( "{} {}\n".format(k,v) )
+    with open(processed_data_path + '/' + os.path.basename(folder) + '_top_100_hashtags.txt', "w", encoding='utf-8') as f:
+        for k,v in  total_counter.most_common(100):
+            # print(k,v)
+            f.write( "{} {}\n".format(k,v) )
     return total_counter
 
 def generate_word_cloud(counts, label):
