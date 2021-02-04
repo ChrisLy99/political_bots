@@ -61,11 +61,13 @@ target/
 data
 
 # Jupyter Notebook
+playground.ipynb
 Scratchpad.ipynb
 .ipynb_checkpoints
 
 # twarc
 twarc.log
+*.log
 
 # IPython
 profile_default/
