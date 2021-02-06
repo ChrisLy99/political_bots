@@ -11,6 +11,18 @@ def subsample_hashtags(election_hts:pd.Series, user_timeline_fps:list):
     subspaced_hts = user_hts.reindex(election_hts.index, fill_value=0)
     return subspaced_hts.values
 
+def compile_vectors(timeline_fp, vector):
+    folders = [folder for folder in os.listdir(user_timeline) if '.' not in folder]
+    result = {}
+    for f in folders:
+        user_folder = os.path.join(timeline_fp, f)
+        print(user_folder)
+        user_jsons = [os.path.join(user_folder, name) for name in os.listdir(user_folder) if 'tweets' in name]
+        ht_vector = subsample_hashtags(vector, user_jsons)
+        result[f] = ht_vector
+    return result
+
+
 # calculates the modified jaccard similarity of two hashtag vectors from two news stations
 # precondition: the two vectors are of same dimension and the order of which follows the feature space
 def jaccard_similarity(news_vec1: np.ndarray, news_vec2: np.ndarray):
