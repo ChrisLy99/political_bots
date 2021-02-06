@@ -55,7 +55,7 @@ def timeline_to_retweets(screen_name):
     """
     jsonl_path = get_user_timeline(screen_name)
     txt_path = os.path.splitext(jsonl_path)[0] + '.txt'
-    jsonl_path_rts = os.path.join(__proc_data_path__, f'{screen_name}_rts.jsonl')
+    jsonl_path_rts = os.path.join(__raw_data_path__, f'{screen_name}_rts.jsonl')
 
     if not os.path.isfile(txt_path):
         twts = []
@@ -75,7 +75,7 @@ def get_users(screen_name, n):
     n user ids from that compilation.
 
     """
-    path_rts = os.path.join(__proc_data_path__, f'{screen_name}_rts.jsonl')
+    path_rts = os.path.join(__raw_data_path__, f'{screen_name}_rts.jsonl')
     user_data_path = os.path.join(__raw_data_path__, f'{screen_name}_users')
     path_users = os.path.join(user_data_path, f'{screen_name}_users.txt')
     path_sample = os.path.join(user_data_path, f'{screen_name}_{n}_users.txt')
