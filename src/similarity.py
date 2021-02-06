@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from src.stats import *
-from sklearn.manifold import SpectralEmbedding
+#from sklearn.manifold import SpectralEmbedding
 
 # takes in the hashtag vector from election, subsamples the hashtag space in usertime line with this vector
 # election_hts: the ht vector
@@ -11,15 +11,17 @@ def subsample_hashtags(election_hts:pd.Series, user_timeline_fps:list):
     subspaced_hts = user_hts.reindex(election_hts.index, fill_value=0)
     return subspaced_hts.values
 
+# timeline_fp: path that contains {news_station}_{number}_users.jsonl
 def compile_vectors(timeline_fp, vector):
-    folders = [folder for folder in os.listdir(user_timeline) if '.' not in folder]
+    files = [os.path.join(timeline_fp, file) for file in os.listdir(user_timeline) if 'users.jsonl' not in folder]
     result = {}
-    for f in folders:
-        user_folder = os.path.join(timeline_fp, f)
-        print(user_folder)
-        user_jsons = [os.path.join(user_folder, name) for name in os.listdir(user_folder) if 'tweets' in name]
+    for f in files:
+        news_station = os.path.split(f)[1].split('_')[0]
+        print(f)
+        # ugly, but had to comply with the hashtag collection function :p
+        user_jsons = [f]
         ht_vector = subsample_hashtags(vector, user_jsons)
-        result[f] = ht_vector
+        result[news_station] = ht_vector
     return result
 
 
