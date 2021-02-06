@@ -2,60 +2,60 @@ import os
 import numpy as np
 import json
 
-from twarc import Twarc
-from utils import get_project_root
+from utils import get_project_root, configure_twarc
 
 
 root = get_project_root()
-raw_data_path = os.path.join(root, 'data', 'raw', 'news')
-proc_data_path = os.path.join(root, 'data', 'processed', 'news')
+# Default values, will be changed in setup_paths
+__news_path__ = os.path.join(root, 'config', 'news_stations.txt')
+__raw_data_path__ = os.path.join(root, 'data', 'raw', 'news')
+__proc_data_path__ = os.path.join(root, 'data', 'processed', 'news')
 
-def configure_twarc():
-    """Passes api credentials into Twarc."""
-    t = Twarc(
-        os.getenv('CONSUMER_KEY'),
-        os.getenv('CONSUMER_SECRET'),
-        os.getenv('ACCESS_TOKEN'),
-        os.getenv('ACCESS_TOKEN_SECRET')
-    )
-    return t
 
 def test():
+    """Custom function for purely debugging purposes, to be deleted later"""
     t = configure_twarc()
 
     get_users(screen_name='BBCWorld')
 
-def get_news_rts():
-    """Downloads retweets for the networks specified in config file.
+def setup_paths(news_path, raw_data_path, proc_data_path, **kwargs):
+    """Allows for defining paths to check for files"""
+    global __news_path__, __raw_data_path__, __proc_data_path__
+    __news_path__ = os.path.join(root, news_path)
+    __raw_data_path__ = os.path.join(root, raw_data_path)
+    __proc_data_path__ = os.path.join(root, proc_data_path)
 
-    Attempts downloading data if data file doesn't already exist.
+def get_news_data(n=500, **kwargs):
+    """Downloads everything.
 
-    """
-    news_path = os.path.join(root, 'config', 'news_stations.txt')
-    with open(news_path, 'r') as fh:
-        for line in fh:
-            screen_name = str.strip(line)
-            # timeline_to_retweets(screen_name=screen_name)
-            get_users(screen_name=screen_name)
+    Attempts downloading retweets for the networks, timelines of retweeters,
+    and compiles retweeter timelines to a single file if compiled file
+    doesn't already exist.
 
-def get_timeline_retweeters():
-    """Downloads timelines of users retweeting the networks specified
-    in config file.
-
-    Attempts downloading data if data file doesn't already exist.
+    Args:
+        n (int): number of retweeters to observe
 
     """
-    news_path = os.path.join(root, 'config', 'news_stations.txt')
-    with open(news_path, 'r') as fh:
+    setup_paths(**kwargs)
+    with open(__news_path__, 'r') as fh:
         for line in fh:
             screen_name = str.strip(line)
-            get_users(screen_name)
+            path_compiled = os.path.join(__proc_data_path__, f'{screen_name}_{n}_users.jsonl')
+
+            if not os.path.isfile(path_compiled):
+                timeline_to_retweets(screen_name=screen_name)
+                get_users(screen_name=screen_name, n=n)
 
 def timeline_to_retweets(screen_name):
-    """Downloads retweets given the user screen name."""
+    """Downloads retweets given the user screen name.
+
+    Compiles a text file of tweet IDs from the user's timeline. Using that,
+    attempts to download the retweets.
+
+    """
     jsonl_path = get_user_timeline(screen_name)
     txt_path = os.path.splitext(jsonl_path)[0] + '.txt'
-    jsonl_path_rts = os.path.join(proc_data_path, f'{screen_name}_rts.jsonl')
+    jsonl_path_rts = os.path.join(__proc_data_path__, f'{screen_name}_rts.jsonl')
 
     if not os.path.isfile(txt_path):
         twts = []
@@ -68,10 +68,15 @@ def timeline_to_retweets(screen_name):
 
     download_retweets(txt_path, jsonl_path_rts)
 
-def get_users(screen_name, n=500):
-    """Retrieve user ids given retweets of a user."""
-    path_rts = os.path.join(proc_data_path, f'{screen_name}_rts.jsonl')
-    user_data_path = os.path.join(raw_data_path, f'{screen_name}_users')
+def get_users(screen_name, n):
+    """Downloads timelines of users retweeting the user.
+
+    Compiles a text file of user IDs that retweeted the user's tweets. Sample
+    n user ids from that compilation.
+
+    """
+    path_rts = os.path.join(__proc_data_path__, f'{screen_name}_rts.jsonl')
+    user_data_path = os.path.join(__raw_data_path__, f'{screen_name}_users')
     path_users = os.path.join(user_data_path, f'{screen_name}_users.txt')
     path_sample = os.path.join(user_data_path, f'{screen_name}_{n}_users.txt')
     os.makedirs(user_data_path, exist_ok=True)
@@ -92,19 +97,23 @@ def get_users(screen_name, n=500):
     compile_users(screen_name, n)
 
 def compile_users(screen_name, n):
-    user_data_path = os.path.join(raw_data_path, f'{screen_name}_users')
+    """Compiles n users' timelines to a single file.
+
+    Download all n users' timelines before compiling into a single file.
+
+    """
+    user_data_path = os.path.join(__raw_data_path__, f'{screen_name}_users')
     path_sample = os.path.join(user_data_path, f'{screen_name}_{n}_users.txt')
+    path_compiled = os.path.join(__proc_data_path__, f'{screen_name}_{n}_users.jsonl')
 
-    with open(path_sample) as fh:
-        for line in fh:
-            user_id = str.strip(line)
-            jsonl_path = os.path.join(user_data_path, f'{user_id}_tweets.jsonl')
-            if not os.path.isfile(jsonl_path):
-                get_user_timeline(user_id=user_id, fp=user_data_path)
-
-    path_compiled = os.path.join(proc_data_path, f'{screen_name}_{n}_users.jsonl')
     if not os.path.isfile(path_compiled):
-        # result = []
+        with open(path_sample) as fh:
+            for line in fh:
+                user_id = str.strip(line)
+                jsonl_path = os.path.join(user_data_path, f'{user_id}_tweets.jsonl')
+                if not os.path.isfile(jsonl_path):
+                    get_user_timeline(user_id=user_id, fp=user_data_path)
+
         with open(path_sample, 'r') as fh, open(path_compiled, 'w') as outfile:
             for line in fh:
                 user_id = str.strip(line)
@@ -112,16 +121,13 @@ def compile_users(screen_name, n):
                 with open(jsonl_path) as infile:
                     for line in infile:
                         outfile.write(json.dumps(line) + '\n')
-                    # result.append(json.load(infile))
-            # with open(path_compiled, 'w') as outfile:
-            #     json.dump(result, outfile)
 
-def get_user_timeline(user_id=None, screen_name=None, fp=raw_data_path):
+def get_user_timeline(user_id=None, screen_name=None, fp=__raw_data_path__):
     """Retrieves user timeline data given retweet using twarc.
 
     Requires either user_id or screen_name, not both.
 
-    Parameters:
+    Args:
         user_id: A user's unique id
         screen_name: A user's Twitter handle
         fp: file path for the timeline file
