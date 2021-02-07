@@ -1,1 +1,2 @@
-testStation
+leftStation
+rightStation
