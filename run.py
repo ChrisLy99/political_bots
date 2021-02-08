@@ -7,7 +7,10 @@ import env_setup
 import etl_election
 import etl_news
 import eda
+import similarity
+import hashtags
 from utils import get_project_root, load_config
+
 
 
 def main(targets):
@@ -30,8 +33,12 @@ def main(targets):
         eda.main(test=True)
 
     if 'test' in targets:
-        config = load_config('config/test_params.json')
-        etl_news.get_news_data(**config)
+        # config = load_config('config/test_params.json')
+        # etl_news.get_news_data(**config)
+
+
+        temp = hashtags.count_features([os.path.join(root, 'test', 'testdata', 'test_election.jsonl')])
+        similarity.compile_vectors(os.path.join(root, 'test', 'testdata'), temp)
 
 if __name__ == '__main__':
     targets = sys.argv[1:]
