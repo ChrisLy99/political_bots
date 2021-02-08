@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 # Count the number of occurences of every hashtag in the JSON
 def hashtag_counts(json):
     print(json)
