@@ -7,6 +7,7 @@ import etl_news
 import eda
 import similarity
 import hashtags
+import pandas as pd
 from utils import get_project_root, load_config
 
 
@@ -15,8 +16,9 @@ def main(targets):
     """Runs the main project pipeline project, given targets."""
     root = get_project_root()
 
-    env_setup.auth()
-    env_setup.make_datadir()
+    if 'test' not in targets:
+        env_setup.auth()
+        env_setup.make_datadir()
 
     if 'all' in targets:
         targets = ['data', 'eda']
