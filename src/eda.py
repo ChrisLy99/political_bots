@@ -14,6 +14,8 @@ raw_data_path = os.path.join(root, 'data', 'raw', 'news')
 processed_data_path = os.path.join(root, 'data', 'processed', 'news')
 graph_data_path = os.path.join(root, 'data', 'graphs', 'news')
 
+test_data_path = os.path.join(root, 'test', 'testdata')
+
 def json_to_df(fp):
     """Reads in jsonl file and returns Pandas dataframe"""
     data = []
@@ -43,22 +45,23 @@ def get_hashtags(df):
     
     return my_dict
 
-def count_hashtags(folder):
+def count_hashtags(filename):
     """Returns dictionary of hashtag occurences from all files in folder"""
     total_counter = Counter()
     print()
 
-    for filename in os.listdir(folder):
-        print('Parsing current file: ', filename)
-        df = json_to_df(folder + '/' + filename)
-        try:
-            hashtags_dict = get_hashtags(df)
-        except:
-            continue
+    print('Parsing current file: ', filename)
+    df = json_to_df(filename)
 
-        total_counter += hashtags_dict
+    hashtags_dict = get_hashtags(df)
+    # try:
+    #     hashtags_dict = get_hashtags(df)
+    # except Exception as e:
+    #     print(e)
 
-    with open(processed_data_path + '/' + os.path.basename(folder) + '_top_100_hashtags.txt', "w", encoding='utf-8') as f:
+    total_counter += hashtags_dict
+
+    with open(processed_data_path + '/' + os.path.basename(filename) + '_top_100_hashtags.txt', "w", encoding='utf-8') as f:
         for k,v in  total_counter.most_common(100):
             # print(k,v)
             f.write( "{} {}\n".format(k,v) )
@@ -68,13 +71,25 @@ def generate_word_cloud(counts, label):
     """Generates word cloud graph from dictionary of hashtag frequencies"""
     wordcloud = WordCloud(max_words=50, background_color="white")
     wordcloud.generate_from_frequencies(frequencies=counts)
+
+    label = label[:-7]
+
+    
     plt.figure()
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
-    plt.savefig(graph_data_path + '/' + label + '_wordcloud.png')
+    plt.title(label + 'Wordcloud')
+    plt.savefig(graph_data_path + '/' + label + '_wordcloud.png',bbox_inches='tight')
 
-def main():
-    for folder in os.listdir(raw_data_path):
-        print(folder)
-        counts = count_hashtags(raw_data_path + '/' + folder)
-        generate_word_cloud(counts, folder)
+def main(test=False):
+    if test:
+        data_path = test_data_path
+    else:
+        data_path = raw_data_path
+
+    for file_ in os.listdir(data_path):
+        if '_users.jsonl' in file_:
+            # print(file_)
+            counts = count_hashtags(data_path + '/' + file_)
+            label = os.path.basename(file_)
+            generate_word_cloud(counts, label)
