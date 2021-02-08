@@ -1,8 +1,6 @@
 import sys
 import os
-
 sys.path.insert(0, 'src')
-
 import env_setup
 import etl_election
 import etl_news
@@ -35,10 +33,14 @@ def main(targets):
     if 'test' in targets:
         # config = load_config('config/test_params.json')
         # etl_news.get_news_data(**config)
-
-
+        
+        # hashtag vector from the election dataset
         temp = hashtags.count_features([os.path.join(root, 'test', 'testdata', 'test_election.jsonl')])
+        # hashtag vector for each news stations
         news_vectors = similarity.compile_vectors(os.path.join(root, 'test', 'testdata'), temp)
+        result_path = os.path.join(root, 'test', 'testreport')
+        pd.Series(news_vectors).to_json(os.path.join(result_path, 'news_vector.json'))
+        temp.to_json(os.path.join(result_path, 'election_vector.json'))
         # TODO: calculate pairwise similarity among news vectors
 
 if __name__ == '__main__':
