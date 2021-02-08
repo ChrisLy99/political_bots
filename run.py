@@ -30,15 +30,16 @@ def main(targets):
         # etl_election.rehydrate_tweets(100)
 
     if 'eda' in targets:
-        eda.main(test=True)
+        eda.main()
 
     if 'test' in targets:
         # config = load_config('config/test_params.json')
         # etl_news.get_news_data(**config)
 
+        eda.main(test=True)
 
-        temp = hashtags.count_features([os.path.join(root, 'test', 'testdata', 'test_election.jsonl')])
-        similarity.compile_vectors(os.path.join(root, 'test', 'testdata'), temp)
+        # temp = hashtags.count_features([os.path.join(root, 'test', 'testdata', 'test_election.jsonl')])
+        # similarity.compile_vectors(os.path.join(root, 'test', 'testdata'), temp)
 
 if __name__ == '__main__':
     targets = sys.argv[1:]
