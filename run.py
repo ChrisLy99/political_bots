@@ -4,7 +4,7 @@ sys.path.insert(0, 'src')
 import env_setup
 import etl_election
 import etl_news
-# import eda
+import eda
 import similarity
 import hashtags
 from utils import get_project_root, load_config
@@ -31,8 +31,9 @@ def main(targets):
         eda.main()
 
     if 'test' in targets:
-        # config = load_config('config/test_params.json')
-        # etl_news.get_news_data(**config)
+        config = load_config('config/test_params.json')
+        etl_news.get_news_data(**config)
+        
         eda.main(test=True)
         
         # hashtag vector from the election dataset
