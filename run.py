@@ -27,7 +27,7 @@ def main(targets):
         # etl_election.rehydrate_tweets(100)
 
     if 'eda' in targets:
-        eda.main()
+        eda.main(test=True)
 
     if 'test' in targets:
         config = load_config('config/test_params.json')
