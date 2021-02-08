@@ -6,7 +6,7 @@ sys.path.insert(0, 'src')
 import env_setup
 import etl_election
 import etl_news
-import eda
+# import eda
 import similarity
 import hashtags
 from utils import get_project_root, load_config
@@ -38,7 +38,8 @@ def main(targets):
 
 
         temp = hashtags.count_features([os.path.join(root, 'test', 'testdata', 'test_election.jsonl')])
-        similarity.compile_vectors(os.path.join(root, 'test', 'testdata'), temp)
+        news_vectors = similarity.compile_vectors(os.path.join(root, 'test', 'testdata'), temp)
+        # TODO: calculate pairwise similarity among news vectors
 
 if __name__ == '__main__':
     targets = sys.argv[1:]
