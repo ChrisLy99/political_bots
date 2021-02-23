@@ -6,3 +6,4 @@ washingtonpost
 CBSnews
 nytimes
 RT_America
+BreitbartNews
