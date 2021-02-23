@@ -25,7 +25,7 @@ def main(targets):
                 file_dst = os.path.join(env['dst'], base_dir, name)
                 if not os.path.exists(file_dst):
                     os.symlink(file_src, file_dst)
-        
+
     if 'test' not in targets:
         env_setup.auth()
         env_setup.make_datadir()
@@ -45,9 +45,9 @@ def main(targets):
     if 'test' in targets:
         config = load_config('config/test_params.json')
         etl_news.get_news_data(**config)
-        
+
         eda.main(test=True)
-        
+
         # hashtag vector from the election dataset
         temp = hashtags.count_features([os.path.join(root, 'test', 'testdata', 'test_election.jsonl')])
         # hashtag vector for each news stations
