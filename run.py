@@ -16,6 +16,16 @@ def main(targets):
     """Runs the main project pipeline project, given targets."""
     root = get_project_root()
 
+    if 'setup-dsmlp' in targets:
+        env = load_config("config/env_dsmlp.json")
+        for root, _, files in os.walk(env['src']):
+            base_dir = os.path.basename(os.path.normpath(root))
+            for name in files:
+                file_src = os.path.join(root, name)
+                file_dst = os.path.join(env['dst'], base_dir, name)
+                if not os.path.exists(file_dst):
+                    os.symlink(file_src, file_dst)
+        
     if 'test' not in targets:
         env_setup.auth()
         env_setup.make_datadir()
