@@ -3,6 +3,6 @@ BBCWorld
 MSNBC
 CNN
 washingtonpost
-CBS
+CBSnews
 nytimes
 RT_America
