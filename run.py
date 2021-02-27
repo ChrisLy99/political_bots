@@ -18,13 +18,7 @@ def main(targets):
 
     if 'setup-dsmlp' in targets:
         env = load_config("config/env_dsmlp.json")
-        for root, _, files in os.walk(env['src']):
-            base_dir = os.path.basename(os.path.normpath(root))
-            for name in files:
-                file_src = os.path.join(root, name)
-                file_dst = os.path.join(env['dst'], base_dir, name)
-                if not os.path.exists(file_dst):
-                    os.symlink(file_src, file_dst)
+        env_setup.setup_dsmlp(**env)
         
     if 'test' not in targets:
         env_setup.auth()
