@@ -53,7 +53,7 @@ def timeline_to_retweets(screen_name):
     attempts to download the retweets.
 
     """
-    jsonl_path = get_user_timeline(screen_name)
+    jsonl_path = get_user_timeline(screen_name=screen_name)
     txt_path = os.path.splitext(jsonl_path)[0] + '.txt'
     jsonl_path_rts = os.path.join(__raw_data_path__, f'{screen_name}_rts.jsonl')
 
