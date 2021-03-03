@@ -1,13 +1,27 @@
 import numpy as np
 import pandas as pd
-from src.stats import *
+from src.hashtags import *
+import matplotlib.pyplot as plt
 import os
+import json
 from sklearn.manifold import SpectralEmbedding
+
+def uncase_hashtags(vector):
+    vector.index= vector.index.str.lower()
+    new_vec = vector.reset_index().groupby('index').sum()[0].sort_values(ascending=False)
+    return new_vec
+
+def normalize_counts(vector):
+    return vector / vector.sum()
+
+# choosing this over regex because regex overexcludes options
+def remove_covid(vector, covid_keywords):
+    return vector.loc[~vector.index.isin(covid_keywords)]
 
 # takes in the hashtag vector from election, subsamples the hashtag space in usertime line with this vector
 # election_hts: the ht vector
 # user_timeline_fps: a list of file paths directing at user timeline jsons
-def subsample_hashtags(election_hts:pd.Series, user_timeline_fps:list, normalize = False):
+def subsample_hashtags(election_hts:pd.Series, user_timeline_fps:list):
     '''
     takes in the hashtag vector from election, subsamples the hashtag space in usertime line with this vecto
     
@@ -29,13 +43,14 @@ def subsample_hashtags(election_hts:pd.Series, user_timeline_fps:list, normalize
    
     
     '''
+    print('in subsample')
     user_hts = count_features(user_timeline_fps, top_k = None, mode='hashtag')
     subspaced_hts = user_hts.reindex(election_hts.index, fill_value=0)
     return subspaced_hts.values
 
 
 # timeline_fp: 
-def compile_vectors(timeline_fp, vector):
+def compile_vectors(timeline_fp, vector:pd.Series, case_sensitive=False, normalize=True, kws=None):
     '''
     takes in the folder that contains user timeline jsons, constructs a dictionary with keys of news_station names 
     and values of the hashtag vectors
@@ -53,6 +68,15 @@ def compile_vectors(timeline_fp, vector):
     result : dict
         a dictionary with keys of news_station names and values of the hashtag vectors
     '''
+    if not case_sensitive:
+        print('uncasing hashtags')
+        vector = uncase_hashtags(vector.copy())
+    if normalize:
+        print('normalizing hashtags')
+        vector = normalize_counts(vector.copy())
+    if kws is not None:
+        print('removing keywords')
+        vector = remove_covid(vector.copy(), kws)
     files = [os.path.join(timeline_fp, file) for file in os.listdir(timeline_fp) if 'users.jsonl' in file]
     result = {}
     for f in files:
@@ -112,7 +136,7 @@ def construct_jaccard(news_vectors:dict):
 
 
 # embed a graph by calculating laplacian eigenmap
-def embed(affinity_matrix, n = 2):
+def embed(affinity_matrix, n = 1):
     '''
     uses SpectralEmbedding class from sklearn to calculate the laplacian eigenmap.
     
@@ -130,4 +154,26 @@ def embed(affinity_matrix, n = 2):
     '''
     lap_eigenmap = SpectralEmbedding(n, affinity='precomputed')
     return lap_eigenmap.fit_transform(affinity_matrix)
+
+# execute the entire similarity process and plots the resultant graph
+def plot_embedding(timeline_fp, vector, save_path, dim=1, case_sensitive=False, normalize=True, kws=None):
+    news_vectors = compile_vectors(timeline_fp, vector, case_sensitive=case_sensitive, normalize=normalize, kws=kws)
+    to_save = {}
+    for key in news_vectors.keys():
+        to_save[key] = news_vectors[key].tolist()
+    json.dump(to_save, open(save_path, 'w'))
+    news, adjacency = construct_jaccard(news_vectors)
+    results = embed(adjacency, n=dim)
+    if dim < 2:
+        for i in range(len(results)):
+            coord = results[i]
+            plt.scatter(*[coord,0], label = news[i])
+        plt.title('dimensional reduction of the graph')
+        plt.legend()
+    else:
+        for i in range(len(results)):
+            coord = results[i]
+            plt.scatter(*coord, label = news[i])
+        plt.title('dimensional reduction of the graph')
+        plt.legend()
 
