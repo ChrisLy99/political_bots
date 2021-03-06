@@ -16,6 +16,10 @@ def main(targets):
     """Runs the main project pipeline project, given targets."""
     root = get_project_root()
 
+    if 'setup-dsmlp' in targets:
+        env = load_config("config/env_dsmlp.json")
+        env_setup.setup_dsmlp(**env)
+
     if 'test' not in targets:
         env_setup.auth()
         env_setup.make_datadir()
@@ -35,9 +39,9 @@ def main(targets):
     if 'test' in targets:
         config = load_config('config/test_params.json')
         etl_news.get_news_data(**config)
-        
+
         eda.main(test=True)
-        
+
         # hashtag vector from the election dataset
         temp = hashtags.count_features([os.path.join(root, 'test', 'testdata', 'test_election.jsonl')])
         # hashtag vector for each news stations

@@ -36,4 +36,17 @@ def make_datadir():
 
     return
 
+def setup_dsmlp(src, dst):
+    """Set-up data symlinks."""
 
+    for root, _, files in os.walk(src):
+        base_dir = os.path.basename(os.path.normpath(root))
+        for name in files:
+            file_src = os.path.join(root, name)
+            file_dst = os.path.join(dst, base_dir, name)
+            if not os.path.exists(file_dst):
+                try:
+                    os.unlink(file_dst)
+                except:
+                    pass
+                os.symlink(file_src, file_dst)
