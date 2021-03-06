@@ -120,7 +120,7 @@ def compile_users(screen_name, n):
                 jsonl_path = os.path.join(user_data_path, f'{user_id}_tweets.jsonl')
                 with open(jsonl_path) as infile:
                     for line in infile:
-                        outfile.write(json.dumps(line) + '\n')
+                        outfile.write(line)
 
 def get_user_timeline(user_id=None, screen_name=None, fp=__raw_data_path__):
     """Retrieves user timeline data given retweet using twarc.
