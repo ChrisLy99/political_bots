@@ -53,7 +53,7 @@ def timeline_to_retweets(screen_name):
     attempts to download the retweets.
 
     """
-    jsonl_path = get_user_timeline(screen_name)
+    jsonl_path = get_user_timeline(screen_name=screen_name)
     txt_path = os.path.splitext(jsonl_path)[0] + '.txt'
     jsonl_path_rts = os.path.join(__raw_data_path__, f'{screen_name}_rts.jsonl')
 
@@ -120,7 +120,7 @@ def compile_users(screen_name, n):
                 jsonl_path = os.path.join(user_data_path, f'{user_id}_tweets.jsonl')
                 with open(jsonl_path) as infile:
                     for line in infile:
-                        outfile.write(json.dumps(line) + '\n')
+                        outfile.write(line)
 
 def get_user_timeline(user_id=None, screen_name=None, fp=__raw_data_path__):
     """Retrieves user timeline data given retweet using twarc.

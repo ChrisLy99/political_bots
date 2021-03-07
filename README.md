@@ -17,16 +17,30 @@ If you do not have twitter API credentials, please visit https://developer.twitt
 To install the dependencies, run the following command from the root directory of the project: pip install ```-r requirements.txt```
 
 ## How to use run.py:
-run.py takes in one argument, a choice between *data*, *eda*, TBA
+run.py takes in one argument, a choice between *data*, *eda*, *test*
+
+## Directories
+* A directory titled *data* will be created with 4 subdirectories: *graphs, raw, processed*
+   * *graphs* will hold any charts from eda functions
+   * *processed* will hold any statistic data from eda functions
+   * *raw* will hold raw tweet data
+* Each of the above directories will be split into two additional subdirectories, *news* and *election*
+   * *news* will hold any data related to news stations
+   * *election* will hold any data related to the election dataset
 
 ## Description of arguments (targets)
 
 ### data
-*This target will take about 1-2 hours to download and rehydrate*
-* The data target automatically loads in your twitter API credentials for use in downloading data to be used in our project.
-* A directory titled *data* will be created with 4 subdirectories: *graphs, out, raw*
-   * *graphs* will hold any charts from eda functions
-   * *out* will hold any statistic data from eda functions
-   * *raw* will hold raw tweet data
-* You can specify the date range of interest by modifying the config/date-range.json file, making sure to follow the *yyyy-mm-dd* format.
+* Your twitter API credentials for use in downloading data to be used in our project.
+* The target will download all tweets as specified in the config file *news_params.json*
+
+### eda
+* The eda target will generate statistics and visualizations after data has been gathered from the *data* target
+* Currently we have built a wordcloud visualization that will be stored in *graphs* and a statistic of most common hashtags per news station stored in *processed*
+
+### test
+* The test target is designed for grading functionality in the DSC180B capstone course and will test three functionalities:
+   * *etl_news* checks that test data is available for use
+   * *eda* generates visualizations and statistics based on the test data, stores in *data/graphs/news*
+   * *similarity* will generate similarity hashtag vectors to be used in our main analysis *test/testreport*
 
