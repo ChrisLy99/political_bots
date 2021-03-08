@@ -88,9 +88,12 @@ def sample_file(day_folder, sample_rate):
         result = result.append(s, ignore_index=True)
     return result
 
-def rehydrate_tweets(sample_rate):
+def rehydrate_tweets():
     # Start and configure Twarc
     t = configure_twarc()
+    date_range_fp = os.path.join(root, 'config', 'election_range.json')
+    date_range_dict = json.load(open(date_range_fp))
+    sample_rate = date_range_dict["sample_rate"]
     
     try:
         os.makedirs(json_data_path)
