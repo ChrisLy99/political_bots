@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from src.hashtags import *
 import matplotlib.pyplot as plt
 import os
@@ -97,7 +98,7 @@ def jaccard_similarity(news_vec1: np.ndarray, news_vec2: np.ndarray):
     # just aliasing
     v1 = news_vec1
     v2 = news_vec2
-    result = 1 - np.sum(np.minimum(v1, v2)) / np.sum(np.maximum(v1, v2))
+    result = np.sum(np.minimum(v1, v2)) / np.sum(np.maximum(v1, v2))
 #     print(np.minimum(v1, v2), np.maximum(v1, v2))
     return result
 
@@ -170,22 +171,29 @@ def plot_embedding(timeline_fp, vector, save_path, fig_path, use_local=False, di
         for key in news_vectors.keys():
             to_save[key] = news_vectors[key].tolist()
         json.dump(to_save, open(save_path, 'w'))
-    
     news, adjacency = construct_jaccard(news_vectors)
+    sns.heatmap(adjacency, xticklabels=news, yticklabels=news)
+    heatmap_name = f'heatmap_{str(case_sensitive)}_norm_{str(normalize)}_kws_{str(kws is not None)}_topk_{str(top_k)}.png'
+    plt.savefig(heatmap_name)
+    plt.close()
     results = embed(adjacency, n=dim, n_neighbors=n_neighbors)
     if dim < 2:
         for i in range(len(results)):
             coord = results[i]
-            plt.scatter(*[coord,0], label = news[i])
+            plt.scatter(*[coord,0], label = news[i], alpha=0.7)
         plt.title('dimensional reduction of the graph')
-        plt.legend(bbox_to_anchor=(1.1, 1.05))
+        plt.legend(bbox_to_anchor=(1.05, 1.01), loc='upper left')
     else:
         for i in range(len(results)):
             coord = results[i]
             plt.scatter(*coord, label = news[i])
         plt.title('dimensional reduction of the graph')
-        plt.legend(bbox_to_anchor=(1.1, 1.05))
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
     file_name = f'spectrum_case_{str(case_sensitive)}_norm_{str(normalize)}_kws_{str(kws is not None)}_topk_{str(top_k)}.png'
-    destination = os.path.join(fig_path, file_name)
-    plt.savefig(destination, bbox_inches='tight')
+    try:
+        destination = os.path.join(fig_path, file_name)
+        plt.savefig(destination, bbox_inches='tight')
+    except:
+        pass
+#     plt.close()
 

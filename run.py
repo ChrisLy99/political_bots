@@ -60,9 +60,9 @@ def main(targets):
         vector = pd.read_json('vector.json', typ = 'series')
         
         # grid search chart generation
-        normalize_list = [False, True]
-        top_k_list = [100, 300, 500, None]
-        kws_list = [kws, None]
+        normalize_list = [True,False]
+        top_k_list = [300,None]
+        kws_list = [kws,None]
         for normalize in normalize_list:
             for top_k in top_k_list:
                 for kws in kws_list:
