@@ -67,7 +67,7 @@ def count_hashtags(filename):
             f.write( "{} {}\n".format(k,v) )
     return total_counter
 
-def generate_word_cloud(counts, label):
+def generate_word_cloud(counts, label, data_path):
     """Generates word cloud graph from dictionary of hashtag frequencies"""
     wordcloud = WordCloud(max_words=50, background_color="white")
     wordcloud.generate_from_frequencies(frequencies=counts)
@@ -79,7 +79,17 @@ def generate_word_cloud(counts, label):
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
     plt.title(label + 'Wordcloud')
-    plt.savefig(graph_data_path + '/' + label + '_wordcloud.png',bbox_inches='tight')
+    plt.savefig(data_path + '/' + label + '_wordcloud.png',bbox_inches='tight')
+
+def plot_hashtag_counts_r(counter, label, data_path):
+    most_common = counter.most_common(25)
+    
+    plt.figure(figsize=(20,15))
+    plt.yticks(fontsize=25)
+    plt.xticks(fontsize=20)
+    plt.title('Top 25 Used Hashtags in ' + label + ' users', fontsize=30)
+    plt.barh(y = [x[0] for x in most_common[::-1]], width = [x[1] for x in most_common[::-1]], color='r')
+    plt.savefig(data_path + '/' + label + '_hashtag_counts.png')
 
 def main(test=False):
     if test:
@@ -92,4 +102,5 @@ def main(test=False):
             # print(file_)
             counts = count_hashtags(data_path + '/' + file_)
             label = os.path.basename(file_)
-            generate_word_cloud(counts, label)
+            generate_word_cloud(counts, label, os.path.join(root, 'test', 'testreport'))
+            plot_hashtag_counts_r(counts, label, os.path.join(root, 'test', 'testreport'))
