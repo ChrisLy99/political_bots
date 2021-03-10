@@ -4,7 +4,7 @@ sys.path.insert(0, 'src')
 import env_setup
 import etl_election
 import etl_news
-# import eda
+import eda
 import similarity
 import hashtags
 import pandas as pd

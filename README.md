@@ -38,9 +38,12 @@ run.py takes in one argument, a choice between *data*, *eda*, *test*
 * The eda target will generate statistics and visualizations after data has been gathered from the *data* target
 * Currently we have built a wordcloud visualization that will be stored in *graphs* and a statistic of most common hashtags per news station stored in *processed*
 
+### compile and embed
+* Performs graph embedding calculations as described in the methodology section of the report
+
 ### test
 * The test target is designed for grading functionality in the DSC180B capstone course and will test three functionalities:
    * *etl_news* checks that test data is available for use
-   * *eda* generates visualizations and statistics based on the test data, stores in *data/graphs/news*
+   * *eda* generates visualizations and statistics based on the test data, stores in *test/testreport*
    * *similarity* will generate similarity hashtag vectors to be used in our main analysis *test/testreport*
 
