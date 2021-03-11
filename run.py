@@ -4,7 +4,7 @@ sys.path.insert(0, 'src')
 import env_setup
 import etl_election
 import etl_news
-# import eda
+import eda
 import similarity
 import hashtags
 import pandas as pd
@@ -32,8 +32,7 @@ def main(targets):
         config = load_config('config/news_params.json')
         etl_election.generate_dataset(trange='all')
         etl_election.rehydrate_tweets()
-        # uncomment this
-#         etl_news.get_news_data(**config)
+        etl_news.get_news_data(**config)
         
 
     if 'eda' in targets:
@@ -73,7 +72,7 @@ def main(targets):
         config = load_config('config/test_params.json')
         etl_news.get_news_data(**config)
 
-#         eda.main(test=True)
+        eda.main(test=True)
 
         config = load_config('config/test_params.json')
         etl_news.get_news_data(**config)
