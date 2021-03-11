@@ -98,8 +98,9 @@ def jaccard_similarity(news_vec1: np.ndarray, news_vec2: np.ndarray):
     # just aliasing
     v1 = news_vec1
     v2 = news_vec2
+    if np.sum(np.maximum(v1, v2)) == 0:
+        return 0
     result = np.sum(np.minimum(v1, v2)) / np.sum(np.maximum(v1, v2))
-#     print(np.minimum(v1, v2), np.maximum(v1, v2))
     return result
 
 
@@ -158,7 +159,7 @@ def embed(affinity_matrix, n = 1,n_neighbors=1):
     return lap_eigenmap.fit_transform(affinity_matrix)
 
 # execute the entire similarity process and plots the resultant graph
-def plot_embedding(timeline_fp, vector, save_path, fig_path, use_local=False, dim=1, case_sensitive=False, normalize=True, kws=None, n_neighbors=1, top_k=300):
+def plot_embedding(timeline_fp, vector, save_path, fig_path, use_local=False, dim=1, case_sensitive=False, normalize=True, kws=None, n_neighbors=1, top_k=300, test=False):
     try:
         os.makedirs(fig_path)
     except:
@@ -174,7 +175,7 @@ def plot_embedding(timeline_fp, vector, save_path, fig_path, use_local=False, di
     news, adjacency = construct_jaccard(news_vectors)
     sns.heatmap(adjacency, xticklabels=news, yticklabels=news)
     heatmap_name = f'heatmap_{str(case_sensitive)}_norm_{str(normalize)}_kws_{str(kws is not None)}_topk_{str(top_k)}.png'
-    plt.savefig(heatmap_name)
+    plt.savefig(os.path.join(fig_path,heatmap_name))
     plt.close()
     results = embed(adjacency, n=dim, n_neighbors=n_neighbors)
     if dim < 2:
